@@ -6,8 +6,6 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import BaggingClassifier
 from sklearn.utils import resample
 
-with open("app.py", "w") as f:
-    f.write("""
 # === Fungsi Winsorization berbasis IQR ===
 def winsorize_iqr(series):
     Q1 = series.quantile(0.25)
@@ -103,4 +101,3 @@ if st.button("🔍 Prediksi"):
         st.error(f"⚠️ Pasien **BERISIKO** hipertensi (Probabilitas: {proba[1]:.2f})")
     else:
         st.success(f"✅ Pasien **TIDAK BERISIKO** hipertensi (Probabilitas: {proba[0]:.2f})")
-    """)
