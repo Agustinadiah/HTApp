@@ -18,7 +18,7 @@ def winsorize_iqr(series):
 # === 1. Load & Train Model ===
 @st.cache_resource
 def load_model():
-    df = pd.read_csv("data_htfix2.csv", sep=";")
+    df = pd.read_csv("dataoriii.csv", sep=";")
     df = df.drop(columns=["NO", "STASUS BMI"], errors="ignore")
     df = df.rename(columns=lambda x: x.strip().lower().replace(" ", "_").replace("-", "_"))
 
