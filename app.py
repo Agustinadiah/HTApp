@@ -1,3 +1,5 @@
+with open("app.py", "w") as f:
+    f.write("""
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -6,13 +8,20 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import BaggingClassifier
 from sklearn.utils import resample
 
-# ===============================
-# 1. Load & Train Model
-# ===============================
+# === Fungsi Winsorization berbasis IQR ===
+def winsorize_iqr(series):
+    Q1 = series.quantile(0.25)
+    Q3 = series.quantile(0.75)
+    IQR = Q3 - Q1
+    lower = Q1 - 1.5 * IQR
+    upper = Q3 + 1.5 * IQR
+    return series.clip(lower, upper)
+
+# === 1. Load & Train Model ===
 @st.cache_resource
 def load_model():
-    df = pd.read_csv("dataoriii.csv", sep=";")
-    df = df.drop(columns=["NO", "STASUS BMI"])
+    df = pd.read_csv("data_htfix2.csv", sep=";")
+    df = df.drop(columns=["NO", "STASUS BMI"], errors="ignore")
     df = df.rename(columns=lambda x: x.strip().lower().replace(" ", "_").replace("-", "_"))
 
     # Mapping kategori → angka
@@ -27,6 +36,14 @@ def load_model():
     cat_cols = ['jenis_kelamin','konsumsi_obat_ht','beresiko_hipertensi']
     for col in cat_cols:
         df[col] = df[col].fillna(df[col].mode()[0]).astype(int)
+
+    # Handling outlier (htfix2)
+    df = df[(df["bb"].between(30,150)) & 
+            (df["tb"].between(120,200)) & 
+            (df["bmi"].between(15,45))]
+    df["td_sistolik"]   = winsorize_iqr(df["td_sistolik"])
+    df["td_diastolik"]  = winsorize_iqr(df["td_diastolik"])
+    df["gula_darah"]    = winsorize_iqr(df["gula_darah"])
 
     # Balance dataset
     class_0 = df[df['beresiko_hipertensi'] == 0]
@@ -48,10 +65,8 @@ def load_model():
 
 model, scaler, feature_names = load_model()
 
-# ===============================
-# 2. Streamlit UI
-# ===============================
-st.title("🫀 Prediksi Risiko Hipertensi")
+# === 2. Streamlit UI ===
+st.title("🫀 Prediksi Risiko Hipertensi (Model Outlier-Handled)")
 st.write("Masukkan data pasien untuk memprediksi apakah berisiko hipertensi.")
 
 # Input user
@@ -88,5 +103,4 @@ if st.button("🔍 Prediksi"):
         st.error(f"⚠️ Pasien **BERISIKO** hipertensi (Probabilitas: {proba[1]:.2f})")
     else:
         st.success(f"✅ Pasien **TIDAK BERISIKO** hipertensi (Probabilitas: {proba[0]:.2f})")
-
-    
+    """)
