@@ -1,5 +1,3 @@
-with open("app.py", "w") as f:
-    f.write("""
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -8,6 +6,8 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import BaggingClassifier
 from sklearn.utils import resample
 
+with open("app.py", "w") as f:
+    f.write("""
 # === Fungsi Winsorization berbasis IQR ===
 def winsorize_iqr(series):
     Q1 = series.quantile(0.25)
